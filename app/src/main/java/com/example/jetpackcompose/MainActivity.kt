@@ -1,79 +1,75 @@
 package com.example.jetpackcompose
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.jetpackcompose.components.CountryCardWithConstraintLayout
+import com.example.jetpackcompose.data.CountryInfo
+import com.example.jetpackcompose.data.getCountryList
+import com.example.jetpackcompose.ui.theme.CountryInfoAppTheme
 
 class MainActivity : ComponentActivity() {
+
     private val TAG = "MainActivity"
+    private val countryList = getCountryList()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MainScreen()
+            MainScreen(countryList = countryList)
         }
     }
+}
 
-    @Composable
-    private fun MainScreen() {
-        var counter = remember { mutableStateOf(0) }
-        var incrementCounter = {
-            Log.d(TAG, "MainScreen: incrementCounter is ${counter.value}")
-            counter.value = counter.value + 1
-        }
-        var decrementCounter = {
-            Log.d(TAG, "MainScreen: decrementCounter is ${counter.value}")
-            counter.value = counter.value - 1
-        }
-
-        Column(
+@Composable
+fun MainScreen(countryList: List<CountryInfo>) {
+    CountryInfoAppTheme {
+        Surface(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            color = MaterialTheme.colorScheme.surface
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth().padding(2.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Button(
-                    onClick = { decrementCounter.invoke() },
-                    modifier = Modifier.padding(5.dp)
-                ) {
-                    Text(text = "Decrement")
-                }
-
-                Text(text = "${counter.value} ")
-
-                Button(
-                    onClick = { incrementCounter.invoke() },
-                    modifier = Modifier.padding(5.dp)
-                ) {
-                    Text(text = "Increment")
+            LazyColumn {
+                items(countryList) {
+                    CountryCard(countryInfo = it)
                 }
             }
         }
     }
+}
 
-    @Preview(showBackground = true)
-    @Composable
-    fun DefaultPreview() {
-        MainScreen()
+@Composable
+fun CountryCard(countryInfo: CountryInfo) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth(1.0f)
+            .padding(5.dp)
+            .border(1.dp, Color.LightGray)
+            .wrapContentHeight(align = Alignment.Top),
+        shadowElevation = 2.dp
+
+    ) {
+        CountryCardWithConstraintLayout(countryInfo = countryInfo)
     }
 }
 
+
+@Preview(showBackground = true)
+@Composable
+fun GreetingPreview() {
+    MainScreen(getCountryList())
+}
