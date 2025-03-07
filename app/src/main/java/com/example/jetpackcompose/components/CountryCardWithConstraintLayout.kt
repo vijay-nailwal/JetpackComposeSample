@@ -30,11 +30,11 @@ fun CountryCardWithConstraintLayout(countryInfo: CountryInfo) {
         val imageResId = countryInfo.flagId
         val imagePainter: Painter = painterResource(id = imageResId)
 
-        //using guidelines
-        val startGuideline = createGuidelineFromStart(2.dp)
-        val topGuidLine = createGuidelineFromTop(2.dp)
-        val bottomGuideline = createGuidelineFromBottom(5.dp)
-        val endGuideline = createGuidelineFromEnd(5.dp)
+        //using barrier
+        val startingBarrier = createStartBarrier(flag)
+        val topBarrier = createTopBarrier(flag)
+        val flagBottomBarrier = createBottomBarrier(flag)
+        val bottomBarrier = createBottomBarrier(capital)
 
         //flag
         Image(painter = imagePainter,
@@ -45,8 +45,8 @@ fun CountryCardWithConstraintLayout(countryInfo: CountryInfo) {
                 .height(50.dp)
                 .padding(2.dp)
                 .constrainAs(flag) {
-                    top.linkTo(topGuidLine)
-                    start.linkTo(startGuideline)
+                    top.linkTo(parent.top)
+                    start.linkTo(parent.start)
                 })
 
         //india
@@ -56,7 +56,7 @@ fun CountryCardWithConstraintLayout(countryInfo: CountryInfo) {
                 .padding(2.dp)
                 .constrainAs(commonName) {
                     top.linkTo(flag.bottom)
-                    start.linkTo(startGuideline)
+                    start.linkTo(startingBarrier)
                     end.linkTo(flag.end)
                 },
             fontFamily = FontFamily.SansSerif,
@@ -72,9 +72,8 @@ fun CountryCardWithConstraintLayout(countryInfo: CountryInfo) {
                 .padding(2.dp)
                 .constrainAs(capital) {
                     top.linkTo(commonName.bottom)
-                    start.linkTo(startGuideline)
+                    start.linkTo(startingBarrier)
                     end.linkTo(flag.end)
-                    bottom.linkTo(bottomGuideline)
                 })
         //republic of india
         Text(text = countryInfo.officialName,
@@ -82,7 +81,6 @@ fun CountryCardWithConstraintLayout(countryInfo: CountryInfo) {
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .constrainAs(officialName) {
-                    top.linkTo(topGuidLine)
                     start.linkTo(flag.end)
                     end.linkTo(parent.end)
                 }
@@ -107,45 +105,48 @@ fun CountryCardWithConstraintLayout(countryInfo: CountryInfo) {
             modifier = Modifier
                 .constrainAs(subregion) {
                     start.linkTo(region.start)
-                    top.linkTo(region.bottom)
                     end.linkTo(region.end)
+                    top.linkTo(region.bottom)
                 }
                 .padding(2.dp)
                 .fillMaxWidth(0.60f))
-
         CircularText(text = countryInfo.currencySymbol,
             modifier = Modifier
                 .constrainAs(currencySymbol) {
                     start.linkTo(flag.end, margin = 30.dp)
-                    bottom.linkTo(bottomGuideline, margin = 8.dp)
+                    bottom.linkTo(bottomBarrier, margin = 8.dp)
                 })
         //indian rupee
         Text(
             text = countryInfo.currencyName,
             modifier = Modifier
                 .constrainAs(currencyName) {
+                    start.linkTo(subregion.start)
+                    end.linkTo(subregion.end)
                     top.linkTo(subregion.bottom)
-                    start.linkTo(currencySymbol.end, margin = 12.dp)
-                    bottom.linkTo(bottomGuideline, margin = 5.dp)
-                    end.linkTo(mobileCode.start)
-                }, textAlign = TextAlign.Center
+                }.fillMaxWidth(0.60f)
+                .padding(2.dp),
+            textAlign = TextAlign.Center
+
         )
         //+91
         Text(
             text = countryInfo.mobileCode,
             modifier = Modifier.constrainAs(mobileCode) {
+                end.linkTo(parent.end)
                 top.linkTo(subregion.bottom)
-                end.linkTo(endGuideline)
 
             }.width(50.dp)
 
         )
+
         //.in
         Text(
             text = countryInfo.tld,
             modifier = Modifier.constrainAs(tld) {
                 top.linkTo(mobileCode.bottom)
-                end.linkTo(endGuideline)
+                end.linkTo(mobileCode.end)
+                start.linkTo(mobileCode.start)
             }.width(50.dp)
         )
     }
