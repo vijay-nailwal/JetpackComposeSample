@@ -20,7 +20,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.jetpackcompose.data.CountryInfo
 
 @Composable
-fun CountryCardWithConstraintLayout(countryInfo: CountryInfo){
+fun CountryCardWithConstraintLayout(countryInfo: CountryInfo) {
     ConstraintLayout(
         modifier = Modifier
             .wrapContentHeight()
@@ -30,26 +30,33 @@ fun CountryCardWithConstraintLayout(countryInfo: CountryInfo){
         val imageResId = countryInfo.flagId
         val imagePainter: Painter = painterResource(id = imageResId)
 
+        //using guidelines
+        val startGuideline = createGuidelineFromStart(2.dp)
+        val topGuidLine = createGuidelineFromTop(2.dp)
+        val bottomGuideline = createGuidelineFromBottom(5.dp)
+        val endGuideline = createGuidelineFromEnd(5.dp)
+
+        //flag
         Image(painter = imagePainter,
             contentDescription = "Country Flag",
             contentScale = ContentScale.Crop,
             modifier = Modifier
-                .fillMaxWidth(0.35f)
-                .height(70.dp)
+                .fillMaxWidth(0.2f)
+                .height(50.dp)
                 .padding(2.dp)
                 .constrainAs(flag) {
-                    top.linkTo(parent.top)
-                    start.linkTo(parent.start)
+                    top.linkTo(topGuidLine)
+                    start.linkTo(startGuideline)
                 })
 
-
+        //india
         Text(
             text = countryInfo.commonName,
             modifier = Modifier
                 .padding(2.dp)
                 .constrainAs(commonName) {
                     top.linkTo(flag.bottom)
-                    start.linkTo(parent.start)
+                    start.linkTo(startGuideline)
                     end.linkTo(flag.end)
                 },
             fontFamily = FontFamily.SansSerif,
@@ -57,84 +64,89 @@ fun CountryCardWithConstraintLayout(countryInfo: CountryInfo){
             fontSize = 20.sp
         )
 
+        //new delhi
         Text(text = countryInfo.nationalCapital,
             fontSize = 15.sp,
             textAlign = TextAlign.Left,
             modifier = Modifier
                 .padding(2.dp)
                 .constrainAs(capital) {
-                    start.linkTo(parent.start)
                     top.linkTo(commonName.bottom)
+                    start.linkTo(startGuideline)
                     end.linkTo(flag.end)
+                    bottom.linkTo(bottomGuideline)
                 })
-
+        //republic of india
         Text(text = countryInfo.officialName,
             fontSize = 18.sp,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .constrainAs(officialName) {
-                    top.linkTo(parent.top)
+                    top.linkTo(topGuidLine)
                     start.linkTo(flag.end)
                     end.linkTo(parent.end)
                 }
                 .padding(2.dp)
-                .fillMaxWidth(0.65f))
-
+                .fillMaxWidth(0.60f))
+        //asia
         Text(text = countryInfo.region,
             fontSize = 15.sp,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .constrainAs(region) {
+                    top.linkTo(officialName.bottom)
                     start.linkTo(flag.end)
                     end.linkTo(parent.end)
-                    top.linkTo(officialName.bottom)
                 }
                 .padding(2.dp)
-                .fillMaxWidth(0.8f))
-
+                .fillMaxWidth(0.60f))
+        //south asia
         Text(text = countryInfo.subRegion,
             fontSize = 12.sp,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .constrainAs(subregion) {
-                    start.linkTo(officialName.start)
+                    start.linkTo(region.start)
                     top.linkTo(region.bottom)
-                    end.linkTo(officialName.end)
+                    end.linkTo(region.end)
                 }
                 .padding(2.dp)
-                .fillMaxWidth(0.8f))
+                .fillMaxWidth(0.60f))
 
         CircularText(text = countryInfo.currencySymbol,
             modifier = Modifier
                 .constrainAs(currencySymbol) {
                     start.linkTo(flag.end, margin = 30.dp)
-                    bottom.linkTo(parent.bottom, margin = 8.dp)
+                    bottom.linkTo(bottomGuideline, margin = 8.dp)
                 })
-        Text(text = countryInfo.currencyName,
+        //indian rupee
+        Text(
+            text = countryInfo.currencyName,
             modifier = Modifier
                 .constrainAs(currencyName) {
                     top.linkTo(subregion.bottom)
                     start.linkTo(currencySymbol.end, margin = 12.dp)
-                    bottom.linkTo(parent.bottom, margin = 5.dp)
+                    bottom.linkTo(bottomGuideline, margin = 5.dp)
                     end.linkTo(mobileCode.start)
                 }, textAlign = TextAlign.Center
         )
-
+        //+91
         Text(
             text = countryInfo.mobileCode,
             modifier = Modifier.constrainAs(mobileCode) {
                 top.linkTo(subregion.bottom)
-                end.linkTo(parent.end)
-            }.width(50.dp)
-        )
+                end.linkTo(endGuideline)
 
+            }.width(50.dp)
+
+        )
+        //.in
         Text(
             text = countryInfo.tld,
             modifier = Modifier.constrainAs(tld) {
                 top.linkTo(mobileCode.bottom)
-                end.linkTo(parent.end)
+                end.linkTo(endGuideline)
             }.width(50.dp)
         )
-
     }
 }
