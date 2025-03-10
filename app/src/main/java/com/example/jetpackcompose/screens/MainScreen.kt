@@ -1,25 +1,102 @@
 package com.example.jetpackcompose.screens
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.jetpackcompose.components.CountryCard
-import com.example.jetpackcompose.data.Country
+import com.example.jetpackcompose.database.AppDatabase
+import com.example.jetpackcompose.dialogs.MyAlertDialog
+import com.example.jetpackcompose.dialogs.MyNewAlertDialog
+import com.example.jetpackcompose.repository.CountryRepository
+import com.example.jetpackcompose.ui.theme.CountryInfoAppTheme
+import com.example.jetpackcompose.viewmodel.CountryViewModel
+import kotlinx.coroutines.launch
 
 @Composable
-fun MainScreen(countryList: MutableList<Country>, innerPadding: PaddingValues) {
-    Surface(
-        modifier = Modifier.fillMaxSize().padding(paddingValues = innerPadding),
-    ) {
-        LazyColumn {
-            items(countryList) {
-                CountryCard(countryInfo = it)
+fun MainScreen( innerPaddingValues: PaddingValues) {
+
+    val context = LocalContext.current
+    val countryDao = AppDatabase.getDatabase(context.applicationContext).countryDao()
+    val repository = CountryRepository(context,countryDao)
+    val viewModel: CountryViewModel = viewModel(factory = CountryViewModelFactory(repository))
+
+    val countryList = viewModel.allCountries.value
+    val isLoading = viewModel.isLoading.value
+
+    val showDeleteAlertDialog = viewModel.showDeleteAlertDialog
+    val showUpdateCapitalDialog = viewModel.showUpdateCapitalDialog
+    val selectedCountry = viewModel.selectedCountryForDeletion
+    val updateCountryInfo = viewModel.updateCountryInfo.value
+
+    CountryInfoAppTheme {
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues = innerPaddingValues),
+            color = MaterialTheme.colorScheme.surface
+        ) {
+            when {
+                isLoading -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+                else -> {
+                    LazyColumn {
+                        items(items = countryList, key = { country -> country.id ?: 0 }) { country ->
+                            CountryCard(
+                                countryInfo = country,
+                                showDeleteAlertDialog = showDeleteAlertDialog,
+                                selectedCountry = selectedCountry,
+                                viewModel = viewModel
+                            )
+                        }
+                    }
+                }
             }
         }
+    }
+
+    MyAlertDialog(showDialog = showDeleteAlertDialog,
+        title = "Delete confirmation",
+        message = "Do you want to delete this country?", positiveAction = {
+            viewModel.viewModelScope.launch {
+                viewModel.deleteCountry()
+                selectedCountry.value = null
+            }
+        })
+
+    MyNewAlertDialog(showDialog = showUpdateCapitalDialog,
+        title = "Update Capital",
+        message = "Enter new capital",
+        currentCapital = updateCountryInfo?.capital?.get(0) ?: "",
+        positiveAction = {  newCapital ->
+            viewModel.viewModelScope.launch {
+                viewModel.updateCapital(newCapital)
+            }
+        })
+}
+
+class CountryViewModelFactory(private val repository: CountryRepository) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(CountryViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return CountryViewModel(repository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

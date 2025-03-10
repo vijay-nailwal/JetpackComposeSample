@@ -1,5 +1,7 @@
 package com.example.jetpackcompose.components
 
+import android.util.Log
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -8,29 +10,53 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.lifecycle.viewModelScope
 import coil.compose.AsyncImage
 import com.example.jetpackcompose.data.Country
+import com.example.jetpackcompose.viewmodel.CountryViewModel
+import kotlinx.coroutines.launch
 
 @Composable
-fun CountryCardWithConstraintLayout(country: Country) {
+fun CountryCardWithConstraintLayout(country: Country,
+                                    showDeleteAlertDialog: MutableState<Boolean>,
+                                    selectedCountry: MutableState<Country?>,
+                                    viewModel: CountryViewModel){
     ConstraintLayout(
         modifier = Modifier
             .wrapContentHeight()
             .fillMaxWidth()
             .padding(5.dp)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onDoubleTap = {
+                        Log.i("CountryCard", "Country card doubleTap pressed ${country?.id!!}")
+                        viewModel.viewModelScope.launch {
+                            viewModel.updateCountryInfo.value = country
+                            viewModel.showUpdateCapitalDialog.value = true
+                        }
+
+                    }, onLongPress = {
+                        Log.i("CountryCard", "Country card long pressed ${country?.id!!}")
+                        showDeleteAlertDialog.value = true
+                        selectedCountry.value = country
+                    })
+            }
+
     ) {
         val (flag, commonName, capital, officialName, region, subregion, currencySymbol, currencyName, mobileCode, tld) = createRefs()
-
         country?.let {
-            AsyncImage(
-                model = it?.flags?.png,
+            AsyncImage(model = it?.flags?.png,
                 contentScale = ContentScale.Crop,
-                contentDescription = it?.flag, modifier = Modifier.fillMaxWidth(0.35f)
+                contentDescription = it?.flag, modifier = Modifier
+                    .fillMaxWidth(0.35f)
                     .height(70.dp)
                     .padding(2.dp)
                     .constrainAs(flag) {
@@ -51,14 +77,13 @@ fun CountryCardWithConstraintLayout(country: Country) {
                         end.linkTo(flag.end)
                     },
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.bodyLarge
             )
         }
 
         country.capital?.get(0)?.let {
-            Text(
-                text = it,
-                style = MaterialTheme.typography.bodyMedium,
+            Text(text = it,
+                style = MaterialTheme.typography.titleSmall,
                 textAlign = TextAlign.Left,
                 modifier = Modifier
                     .padding(2.dp)
@@ -70,8 +95,7 @@ fun CountryCardWithConstraintLayout(country: Country) {
         }
 
         country.name?.official?.let {
-            Text(
-                text = it,
+            Text(text = it,
                 style = MaterialTheme.typography.titleLarge,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
@@ -85,9 +109,8 @@ fun CountryCardWithConstraintLayout(country: Country) {
         }
 
         country?.region?.let {
-            Text(
-                text = it,
-                style = MaterialTheme.typography.titleMedium,
+            Text(text = it,
+                fontSize = 15.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .constrainAs(region) {
@@ -100,9 +123,8 @@ fun CountryCardWithConstraintLayout(country: Country) {
         }
 
         country.subregion?.let {
-            Text(
-                text = it,
-                style = MaterialTheme.typography.titleSmall,
+            Text(text = it,
+                fontSize = 12.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .constrainAs(subregion) {
@@ -114,9 +136,8 @@ fun CountryCardWithConstraintLayout(country: Country) {
                     .fillMaxWidth(0.8f))
         }
 
-        country?.currencies?.entries?.first()?.let {
-            CircularText(
-                text = it.value.symbol.toString(),
+        country?.currencies?.entries?.first()?.let{
+            CircularText(text = it.value.symbol.toString(),
                 modifier = Modifier
                     .constrainAs(currencySymbol) {
                         start.linkTo(flag.end, margin = 30.dp)
@@ -124,10 +145,8 @@ fun CountryCardWithConstraintLayout(country: Country) {
                     })
         }
 
-        country?.currencies?.entries?.first()?.let {
-            Text(
-                text = it.value.name.toString(),
-                style = MaterialTheme.typography.bodyMedium,
+        country?.currencies?.entries?.first()?.let{
+            Text(text = it.value.name.toString(),
                 modifier = Modifier
                     .constrainAs(currencyName) {
                         top.linkTo(subregion.bottom)
@@ -140,8 +159,7 @@ fun CountryCardWithConstraintLayout(country: Country) {
 
         country.idd?.let {
             Text(
-                text = it.root + "" + it.suffixes?.get(0),
-                style = MaterialTheme.typography.bodySmall,
+                text = it.root+""+it.suffixes?.get(0),
                 modifier = Modifier
                     .constrainAs(mobileCode) {
                         top.linkTo(subregion.bottom)
@@ -154,7 +172,6 @@ fun CountryCardWithConstraintLayout(country: Country) {
         country.tld?.get(0)?.let {
             Text(
                 text = it,
-                style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
                     .constrainAs(tld) {
                         top.linkTo(mobileCode.bottom)

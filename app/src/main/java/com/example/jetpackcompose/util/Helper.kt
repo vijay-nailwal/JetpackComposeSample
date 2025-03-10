@@ -4,6 +4,7 @@ import android.content.Context
 import com.example.jetpackcompose.R
 import com.example.jetpackcompose.data.Country
 import com.example.jetpackcompose.data.CountryInfo
+import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 
 fun getCountryList(): MutableList<CountryInfo> {
@@ -145,9 +146,8 @@ fun getJsonString(context: Context): String {
     return inputStream.bufferedReader().use { it.readText() }
 }
 
-fun getCountryListFromJson(context: Context): MutableList<Country> {
+suspend fun getCountryList(context: Context): MutableList<Country> {
     val jsonStringFromRaw = getJsonString(context = context)
-    return Json { ignoreUnknownKeys = true }.decodeFromString<MutableList<Country>>(
-        jsonStringFromRaw
-    )
+    delay(2000)
+    return Json{ignoreUnknownKeys = true}.decodeFromString<MutableList<Country>>(jsonStringFromRaw)
 }

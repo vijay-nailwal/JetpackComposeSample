@@ -1,7 +1,6 @@
 package com.example.jetpackcompose.components
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Filter
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
@@ -22,87 +21,59 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.example.jetpackcompose.screens.MainScreen
-import com.example.jetpackcompose.util.getCountryListFromJson
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CountryInfoAppScaffold() {
+fun CountryInfoAppScaffold(){
 
-    var countryList = getCountryListFromJson(LocalContext.current)
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-    Scaffold(
+
+    Scaffold (
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
-                colors = TopAppBarDefaults.smallTopAppBarColors(
+                /*colors = TopAppBarDefaults.smallTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary
-                ),
+                ),*/
                 title = {
-//                    Text(text = "CountryInfoApp", style = MaterialTheme.typography.headlineMedium)
                     Text(text = "CountryInfoApp", style = MaterialTheme.typography.labelLarge)
                 },
 //                navigationIcon = {
 //                    IconButton(onClick = { /*TODO*/ }) {
-//                        Icon(imageVector = Icons.Filled.ArrowBack, contentDescription ="ArrowBack")
+//                        Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "ArrowBack")
 //                    }
-//                }
-//                ,
+//                },
+
                 actions = {
                     IconButton(onClick = { /*TODO*/ }) {
                         Icon(imageVector = Icons.Filled.Search, contentDescription = "Search")
                     }
 
                     IconButton(onClick = { /*TODO*/ }) {
-                        Icon(
-                            imageVector = Icons.Filled.MoreVert,
-                            contentDescription = "MoreOptions"
-                        )
+                        Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "MoreVert")
                     }
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
             )
         },
-
         bottomBar = {
-            BottomAppBar(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            ) {
-
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(imageVector = Icons.Filled.Edit, contentDescription = "Edit")
-                }
+            BottomAppBar {
                 IconButton(onClick = { /*TODO*/ }) {
                     Icon(imageVector = Icons.Filled.Sort, contentDescription = "Sort")
                 }
             }
         },
-
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { /*TODO*/ },
+            FloatingActionButton(onClick = { /*TODO*/ },
                 containerColor = BottomAppBarDefaults.bottomAppBarFabColor,
-                elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation(
-                    defaultElevation = 5.dp,
-                    pressedElevation = 10.dp,
-                    focusedElevation = 10.dp,
-                    hoveredElevation = 8.dp
-                )
-            ) {
-                Icon(imageVector = Icons.Filled.Filter, contentDescription = "Filter")
+                elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation( )) {
+                    Icon(imageVector = Icons.Filled.Filter, contentDescription = "Filter")
             }
-        },
-    ) { innerPadding ->
-        MainScreen(countryList, innerPadding = innerPadding)
-    }
-}
+        }
 
-@Preview
-@Composable
-fun SimpleComposablePreview() {
-    CountryInfoAppScaffold()
+    ) { innerPaddingValues ->
+        MainScreen(innerPaddingValues)
+    }
 }
